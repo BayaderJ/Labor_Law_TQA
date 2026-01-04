@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مساعد نظام العمل السعودي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: none;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-height: none;
+        }
+
+        .header {
+            background: #2a5298;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: #764ba2;
+        }
+
+        .message.user .message-avatar {
+            background: #f5576c;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Markdown formatting in bot messages */
+        .message.bot .message-content strong {
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .message.bot .message-content h4 {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1976d2;
+            margin: 15px 0 8px 0;
+        }
+
+        .message.bot .message-content ul {
+            margin: 10px 0;
+            padding-right: 20px;
+        }
+
+        .message.bot .message-content li {
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        .message.bot .message-content p {
+            margin: 8px 0;
+        }
+
+        .articles-used {
+            margin-top: 12px;
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            font-size: 13px;
+            border-right: 3px solid #2196f3;
+        }
+
+        .articles-used strong {
+            color: #1976d2;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .article-tag {
+            display: inline-block;
+            background: #2196f3;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin: 3px;
+            font-size: 12px;
+        }
+
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        #questionInput {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            direction: rtl;
+        }
+
+        #questionInput:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #sendButton {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: #5568d3;
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            margin: 0 3px;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+        }
+
+        .welcome-message h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .welcome-message p {
+            margin: 10px 0;
+            line-height: 1.8;
+        }
+
+        .example-questions {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .example-question {
+            background: white;
+            padding: 12px 20px;
+            margin: 8px 0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .example-question:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🇸🇦 مساعد نظام العمل السعودي</h1>
+            <p>اسأل أي سؤال عن حقوقك في العمل</p>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <h2>مرحباً بك!</h2>
+                <p>أنا مساعدك الذكي للإجابة على أسئلتك حول نظام العمل السعودي</p>
+                <p>يمكنك السؤال عن ساعات العمل، الإجازات، الحقوق، وغيرها</p>
+                
+                <div class="example-questions">
+                    <p><strong>أمثلة على الأسئلة:</strong></p>
+                    <div class="example-question" onclick="askExample(this)">
+                        ما هي ساعات العمل القانونية في اليوم؟
+                    </div>
+                    <div class="example-question" onclick="askExample(this)">
+                        كم مدة الإجازة السنوية؟
+                    </div>
+                    <div class="example-question" onclick="askExample(this)">
+                        ما هي حقوقي عند إنهاء العقد؟
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading">
+            <div class="loading-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <p>جاري البحث في نظام العمل...</p>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="questionInput" 
+                placeholder="اكتب سؤالك هنا..."
+                onkeypress="handleKeyPress(event)"
+            >
+            <button id="sendButton" onclick="sendQuestion()">إرسال</button>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const questionInput = document.getElementById('questionInput');
+        const sendButton = document.getElementById('sendButton');
+        const loading = document.getElementById('loading');
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendQuestion();
+            }
+        }
+
+        // Handle example question click
+        function askExample(element) {
+            questionInput.value = element.textContent.trim();
+            sendQuestion();
+        }
+
+        // Convert markdown-like formatting to HTML
+        function formatBotMessage(text) {
+            // Normalize text
+            text = text.trim();
+            
+            // Convert **text** to <strong>text</strong>
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Convert section headers (text ending with :)
+            // Add space after colon if missing
+            text = text.replace(/^(.+?):(?!\s)/gm, '$1: ');
+            // Make headers bold and add line break after
+            text = text.replace(/^(.+?:)\s*$/gm, '<strong>$1</strong><br>');
+            
+            // Convert bullet points (- text or • text)
+            text = text.replace(/^[•\-]\s*(.+)$/gm, '<li>$1</li>');
+            
+            // Wrap consecutive <li> in <ul>
+            text = text.replace(/(<li>.*?<\/li>\n?)+/g, '<ul>$&</ul>');
+            
+            // Replace multiple consecutive newlines with single break
+            text = text.replace(/\n\n+/g, '<br><br>');
+            
+            // Single newlines become single <br>
+            text = text.replace(/\n/g, '<br>');
+            text = text.replace(/\n/g, '<br>');
+            
+            return text;
+        }
+
+        // Add message to chat
+        function addMessage(text, isUser, articles = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '⚖️';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            // Format bot messages with markdown rendering
+            if (!isUser) {
+                content.innerHTML = formatBotMessage(text);
+            } else {
+                content.textContent = text;
+            }
+            
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            
+            // Remove welcome message if exists
+            const welcome = chatContainer.querySelector('.welcome-message');
+            if (welcome) {
+                welcome.remove();
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Send question to backend
+        async function sendQuestion() {
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('الرجاء كتابة سؤال');
+                return;
+            }
+            
+            // Add user message
+            addMessage(question, true);
+            questionInput.value = '';
+            
+            // Disable input
+            sendButton.disabled = true;
+            questionInput.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                // Call API
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('فشل في الحصول على الإجابة');
+                }
+                
+                const data = await response.json();
+                
+                // Add bot response
+                addMessage(data.answer, false, data.articles);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('عذراً، حدث خطأ. الرجاء المحاولة مرة أخرى.', false);
+            } finally {
+                // Re-enable input
+                sendButton.disabled = false;
+                questionInput.disabled = false;
+                loading.style.display = 'none';
+                questionInput.focus();
+            }
+        }
+
+        // Focus input on load
+        window.onload = () => {
+            questionInput.focus();
+        };
+    </script>
+</body>
+</html>
