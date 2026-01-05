@@ -1,17 +1,18 @@
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-# Load environment variables from .env file
-load_dotenv()
+# اقرأ .env من نفس جذر المشروع
+ENV_PATH = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=ENV_PATH, override=True)
 
-# Groq API Key
-GROQ_API_KEY = os.getenv('GROQ_API_KEY')
-if not GROQ_API_KEY or GROQ_API_KEY == 'your_groq_api_key_here':
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
     raise ValueError(
         "⚠️  GROQ_API_KEY not set!\n"
         "Please:\n"
         "1. Get your FREE key from: https://console.groq.com/\n"
-        "2. Add it to .env file: GROQ_API_KEY=gsk_your_key_here"
+        "2. Add it to .env file: GROQ_API_KEY=gsk_your_key_here\n"
     )
 
 # Groq Model

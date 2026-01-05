@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مساعد نظام العمل السعودي</title>
+    <title>بينة - مساعد نظام العمل السعودي</title>
     <style>
         * {
             margin: 0;
@@ -34,7 +34,7 @@
         }
 
         .header {
-            background: #2a5298;
+            background: #0d3330;
             color: white;
             padding: 25px;
             text-align: center;
@@ -91,7 +91,7 @@
         }
 
         .message.bot .message-avatar {
-            background: #764ba2;
+            background: #0d3330;
         }
 
         .message.user .message-avatar {
@@ -113,20 +113,20 @@
         }
 
         .message.user .message-content {
-            background: #667eea;
+            background: #0d3330;
             color: white;
         }
 
         /* Markdown formatting in bot messages */
         .message.bot .message-content strong {
             font-weight: bold;
-            color: #1976d2;
+            color: #0d3330;
         }
 
         .message.bot .message-content h4 {
             font-size: 16px;
             font-weight: bold;
-            color: #1976d2;
+            color: #0d3330;
             margin: 15px 0 8px 0;
         }
 
@@ -147,21 +147,21 @@
         .articles-used {
             margin-top: 12px;
             padding: 10px;
-            background: #e3f2fd;
+            background: #e8f5f3;
             border-radius: 8px;
             font-size: 13px;
-            border-right: 3px solid #2196f3;
+            border-right: 3px solid #0d3330;
         }
 
         .articles-used strong {
-            color: #1976d2;
+            color: #0d3330;
             display: block;
             margin-bottom: 5px;
         }
 
         .article-tag {
             display: inline-block;
-            background: #2196f3;
+            background: #0d3330;
             color: white;
             padding: 3px 10px;
             border-radius: 12px;
@@ -190,12 +190,12 @@
 
         #questionInput:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0d3330;
         }
 
         #sendButton {
             padding: 15px 30px;
-            background: #667eea;
+            background: #0d3330;
             color: white;
             border: none;
             border-radius: 25px;
@@ -207,8 +207,8 @@
 
         #sendButton:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-            background: #5568d3;
+            box-shadow: 0 5px 15px rgba(13, 51, 48, 0.4);
+            background: #0a2622;
         }
 
         #sendButton:disabled {
@@ -231,7 +231,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #667eea;
+            background: #0d3330;
             margin: 0 3px;
             animation: bounce 1.4s infinite ease-in-out;
         }
@@ -251,7 +251,7 @@
         }
 
         .welcome-message h2 {
-            color: #667eea;
+            color: #0d3330;
             margin-bottom: 15px;
             font-size: 24px;
         }
@@ -277,7 +277,7 @@
         }
 
         .example-question:hover {
-            background: #667eea;
+            background: #0d3330;
             color: white;
             transform: translateX(-5px);
         }
@@ -303,8 +303,8 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🇸🇦 مساعد نظام العمل السعودي</h1>
-            <p>اسأل أي سؤال عن حقوقك في العمل</p>
+            <h1>⚖️ بينة</h1>
+            <p>مساعدك الذكي في نظام العمل السعودي</p>
         </div>
 
         <!-- Chat Area -->
@@ -312,7 +312,6 @@
             <div class="welcome-message">
                 <h2>مرحباً بك!</h2>
                 <p>أنا مساعدك الذكي للإجابة على أسئلتك حول نظام العمل السعودي</p>
-                <p>يمكنك السؤال عن ساعات العمل، الإجازات، الحقوق، وغيرها</p>
                 
                 <div class="example-questions">
                     <p><strong>أمثلة على الأسئلة:</strong></p>
@@ -467,8 +466,13 @@
                 
                 const data = await response.json();
                 
-                // Add bot response
-                addMessage(data.answer, false, data.articles);
+                let extra = "";
+
+                if (data.case_class) {
+                    extra += `\n\n**تصنيف القضية:** ${data.case_class}`;}
+
+                addMessage(data.answer + extra, false, data.articles);
+
                 
             } catch (error) {
                 console.error('Error:', error);

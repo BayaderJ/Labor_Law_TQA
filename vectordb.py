@@ -14,16 +14,15 @@ class VectorDB:
     Wrapper for Qdrant Vector Database operations
     """
     
-    def __init__(self, host: str = "localhost", port: int = 6333):
-        self.host = host
-        self.port = port
+    def __init__(self):
         self.client = None
     
     def connect(self):
         """Connect to Qdrant instance"""
         try:
-            self.client = QdrantClient(host=self.host, port=self.port)
-            print(f"✅ Connected to Qdrant at {self.host}:{self.port}")
+            self.client = QdrantClient(
+            path="artifacts/qdrant_db")
+            print("✅ Qdrant running in LOCAL (embedded) mode")
         except Exception as e:
             print(f"❌ Failed to connect to Qdrant: {e}")
             raise
